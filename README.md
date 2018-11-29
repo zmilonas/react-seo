@@ -23,19 +23,23 @@ And the result? :
 
 <h2>Installation</h2>
 
-    npm install --save react-seo
-
+```sh
+npm install --save react-seo
+```
 
 <h2>Usage</h2>
 
 Import the package in your index.js file
 
-    import ReactSEO from 'react-seo';
+```js
+import ReactSEO from 'react-seo';
+```
 
 Then call
 
-    ReactSEO.startMagic(urls,renderDOMFunction)
-
+```js
+ReactSEO.startMagic(urls,renderDOMFunction)
+```
 
 Urls is a list of objects, that each object represents a url to enable Google indexing on.
 Each object sould have those properties:
@@ -78,93 +82,97 @@ because you're probably not passing a resolve paramater when calling the ajax fu
 
 index.js:
 
-    import React from 'react';
-    import Page1 from '../components/Page1.js';
-    import Page2 from '../components/Page2.js';
-    import ReactDOM from 'react-dom';
-    import ReactSEO from 'react-seo';
-    
-    
-    ReactSEO.startMagic([{url:'/products/',isFullMatch:false,
-	      ajaxFunction:fetchGameData,urlParams:[/(.+\/products\/|\/[^\/]+)/g]}],renderDOM);
-    
-    
-    function renderDOM(){
-        ReactDOM.render(
-          <BrowserRouter basename='/' >
-            <div>
-              <Route path = '/' component={Page1} />
-              <Route path='/products/:id' component={Page2} />
-              </div>
-          </BrowserRouter>
-          ,app);
-          }
+```jsx
+import React from 'react';
+import Page1 from '../components/Page1.js';
+import Page2 from '../components/Page2.js';
+import ReactDOM from 'react-dom';
+import ReactSEO from 'react-seo';
 
+
+ReactSEO.startMagic([{url:'/products/',isFullMatch:false,
+    ajaxFunction:fetchGameData,urlParams:[/(.+\/products\/|\/[^\/]+)/g]}],renderDOM);
+
+
+function renderDOM() {
+    ReactDOM.render(
+      <BrowserRouter basename='/' >
+        <div>
+          <Route path = '/' component={Page1} />
+          <Route path='/products/:id' component={Page2} />
+          </div>
+      </BrowserRouter>
+      ,app);
+}
+```
 
 Page2.js:
 
-    import React from 'react'; 
-    import axios from 'axios';
-    import CustomLoader from './CustomLoader';
-    import AppBar from './AppBar';
-    import GameDataStore from './GameDataStore';
-    import { fetchGameData } from './actions';
-    import Footer from './Footer';
-    
-    
-    export default class Page2 extends React.Component{
-        constructor(){
-          super();
-          this.state={loading:true,GameData: GameDataStore.getGameData()};
-          }
-        
-        componentWillMount(){
-              GameDataStore.on('gameDataIsInDaHouse',this.setData);
-              
-              // Checks if data was already fetched
-              if (this.props.match.params && this.state.GameData.id !== this.props.match.params.id) // is data missing?
-                  {
-                   fetchGameData(this.props.match.params.id);
-                  }
-                else{ // data was already fetched, no need to fetch again.
-                    this.setState({loading:false})
-                    }
-          }
-          
-          componentWillUnmount(){
-              GameDataStore.removeListener('gameDataIsInDaHouse',this.setData);
-            }
-          
-          setData(){
-              const GameData = GameDataStore.getGameData();
-              this.setState({GameData,loading:false});
-          }
-          
-          render(){
-              const data = (<div>
-                               <h2>{this.state.GameData.title}</h2>
-                               <h5>{this.state.GameData.price}</h5>
-                           </div>);
-              return (
-                  <div>
-                      <AppBar />
-                           {this.state.loading ? <CustomLoader /> : data}
-                      <Footer />
-                  </div>
-                  );
-          }
+```jsx
+import React from 'react'; 
+import axios from 'axios';
+import CustomLoader from './CustomLoader';
+import AppBar from './AppBar';
+import GameDataStore from './GameDataStore';
+import { fetchGameData } from './actions';
+import Footer from './Footer';
 
+
+export default class Page2 extends React.Component{
+    constructor() {
+      super();
+      this.state = { 
+        loading:true,
+        GameData: GameDataStore.getGameData()
+      };
+    }
+    
+    componentWillMount(){
+          GameDataStore.on('gameDataIsInDaHouse',this.setData);
+          
+          // Checks if data was already fetched
+          if (this.props.match.params && this.state.GameData.id !== this.props.match.params.id) { // is data missing?
+              fetchGameData(this.props.match.params.id);
+          } else { // data was already fetched, no need to fetch again.
+              this.setState({loading:false})
+          }
+      }
+      
+      componentWillUnmount() {
+          GameDataStore.removeListener('gameDataIsInDaHouse',this.setData);
+      }
+      
+      setData() {
+          const GameData = GameDataStore.getGameData();
+          this.setState({GameData,loading:false});
+      }
+      
+      render() {
+          const data = (<div>
+                           <h2>{this.state.GameData.title}</h2>
+                           <h5>{this.state.GameData.price}</h5>
+                       </div>);
+          return (
+              <div>
+                  <AppBar />
+                       {this.state.loading ? <CustomLoader /> : data}
+                  <Footer />
+              </div>
+          );
+      }
+```
 
 ajaxFunction's ajax request:
     
-    function ajaxFunction(param,resolve){
-		axios.get(`/api?param=${param}`)
-			.then((response)=>{
-				// do stuff
-				this.emit('gameDataIsInDaHouse');
-				if (resolve) // IMPORTANT! call resolve only if it was passed.
-					resolve();
-				});
+```js
+function ajaxFunction(param,resolve){
+    axios.get(`/api?param=${param}`)
+      .then((response)=>{
+        // do stuff
+        this.emit('gameDataIsInDaHouse');
+        if (resolve) // IMPORTANT! call resolve only if it was passed.
+          resolve();
+        });
 
 }
-    
+```
